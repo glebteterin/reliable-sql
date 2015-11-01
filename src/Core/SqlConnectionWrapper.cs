@@ -89,7 +89,7 @@ namespace Sql
 		{
 			//TODO: implement IDbCommand wrapper
 
-			return _connection.CreateCommand();
+			return new SqlCommandWrapper(this, _connection.CreateCommand());
 		}
 
 		public void Open()
