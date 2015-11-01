@@ -87,9 +87,7 @@ namespace Sql
 
 		public IDbCommand CreateCommand()
 		{
-			//TODO: implement IDbCommand wrapper
-
-			return new SqlCommandWrapper(this, _connection.CreateCommand());
+			return new SqlCommandWrapper(this, _connection.CreateCommand(), _delay, _maxRetries);
 		}
 
 		public void Open()

@@ -8,13 +8,40 @@ namespace Sql
 	{
 		private readonly SqlCommand _sqlCommandToWrap;
 
+		private readonly TimeSpan _delay;
+		private readonly int _maxRetries;
+
 		private SqlConnectionWrapper _currentConnection;
 
-		public SqlCommandWrapper(SqlConnectionWrapper currentConnection, SqlCommand sqlCommandToWrap)
+		public SqlCommandWrapper(SqlConnectionWrapper currentConnection, SqlCommand sqlCommandToWrap, TimeSpan delay, int maxRetries)
 		{
 			_currentConnection = currentConnection;
 			_sqlCommandToWrap = sqlCommandToWrap;
+			_delay = delay;
+			_maxRetries = maxRetries;
 		}
+
+		public int ExecuteNonQuery()
+		{
+			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteNonQuery(), _delay, _maxRetries);
+		}
+
+		public IDataReader ExecuteReader()
+		{
+			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteReader(), _delay, _maxRetries);
+		}
+
+		public IDataReader ExecuteReader(CommandBehavior behavior)
+		{
+			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteReader(behavior), _delay, _maxRetries);
+		}
+
+		public object ExecuteScalar()
+		{
+			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteScalar(), _delay, _maxRetries);
+		}
+
+		#region IDbCommand proxy implementation
 
 		public IDbConnection Connection
 		{
@@ -42,7 +69,19 @@ namespace Sql
 			}
 			set
 			{
-				_sqlCommandToWrap.Transaction = (SqlTransaction)value;
+				SqlTransaction tran = null;
+
+				if (value == null)
+				{
+					_sqlCommandToWrap.Transaction = null;
+					return;
+				}
+
+				if ((tran = (value as SqlTransaction)) == null)
+					throw new ArgumentException(string.Format("Unsupported transaction type ({0})",
+						value.GetType().Name));
+
+				_sqlCommandToWrap.Transaction = tran;
 			}
 		}
 
@@ -95,24 +134,6 @@ namespace Sql
 			return _sqlCommandToWrap.CreateParameter();
 		}
 
-		public int ExecuteNonQuery()
-		{
-			return _sqlCommandToWrap.ExecuteNonQuery();
-		}
-
-		public IDataReader ExecuteReader()
-		{
-			return _sqlCommandToWrap.ExecuteReader();
-		}
-
-		public IDataReader ExecuteReader(CommandBehavior behavior)
-		{
-			return _sqlCommandToWrap.ExecuteReader(behavior);
-		}
-
-		public object ExecuteScalar()
-		{
-			return _sqlCommandToWrap.ExecuteScalar();
-		}
+		#endregion
 	}
 }
