@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
+using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using NUnit.Framework;
 using Sql;
 
@@ -14,44 +16,41 @@ namespace IntegrationTests
 		[Test]
 		public void InvalidConnectionString()
 		{
-			var executor = InitExecutor(EmptyConnectionString, TimeSpan.Zero, 2);
+			var executor = InitExecutor(EmptyConnectionString, 0, 2);
 
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
 			Assert.That(testResult.ThrownException, Is.Not.Null);
-			Assert.That(testResult.ThrownException, Is.TypeOf<AggregateException>());
-			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions.Count, Is.EqualTo(2));
+			Assert.That(testResult.ThrownException, Is.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
 		public void MockConnectionString()
 		{
-			var executor = InitExecutor(FakeConnectionString, TimeSpan.Zero, 2);
+			var executor = InitExecutor(FakeConnectionString, 0, 2);
 
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
 			Assert.That(testResult.ThrownException, Is.Not.Null);
-			Assert.That(testResult.ThrownException, Is.TypeOf<AggregateException>());
-			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions.Count, Is.EqualTo(2));
+			Assert.That(testResult.ThrownException, Is.TypeOf<SqlException>());
 		}
 
 		[Test]
 		public void SqlExcption_NotUsable()
 		{
-			var executor = InitExecutor(Config.ConnectionString, TimeSpan.Zero, 1);
+			var executor = InitExecutor(Config.ConnectionString, 0, 1);
 
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
 			Assert.That(testResult.ThrownException, Is.Not.Null);
-			Assert.That(testResult.ThrownException, Is.TypeOf<AggregateException>());
-			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions.Count, Is.EqualTo(1));
-			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions[0].Message.Contains("not usable"));
+			Assert.That(testResult.ThrownException, Is.TypeOf<SqlException>());
+			Assert.That(((SqlException)testResult.ThrownException).Message.Contains("not usable"));
 		}
 
 		[Test]
 		public void NotOpenedConnection_ShouldBeOpened()
 		{
-			var wrapper = new SqlConnectionWrapper(Config.ConnectionString, TimeSpan.Zero, 1);
+			var wrapper = new SqlConnectionWrapper(Config.ConnectionString, CreateRetryPolicy(0, 1));
 
 			var command = wrapper.CreateCommand();
 			command.CommandText = "SELECT 1";
@@ -64,11 +63,16 @@ namespace IntegrationTests
 			Assert.That(resul, Is.EqualTo(1));
 		}
 
-		private static TestExecutor InitExecutor(string connectionString, TimeSpan delay, int retries)
+		private static TestExecutor InitExecutor(string connectionString, int delayMs, int retries)
 		{
-			var executor = new TestExecutor(connectionString, delay, retries);
+			var executor = new TestExecutor(connectionString, CreateRetryPolicy(delayMs, retries));
 
 			return executor;
+		}
+
+		private static RetryPolicy CreateRetryPolicy(int delayMs, int maxRetries)
+		{
+			return new RetryPolicy(new SqlDatabaseTransientErrorDetectionStrategy(), maxRetries, TimeSpan.FromMilliseconds(delayMs));
 		}
 	}
 }

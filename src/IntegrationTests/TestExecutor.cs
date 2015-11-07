@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Linq;
 using Dapper;
+using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using Sql;
 
 namespace IntegrationTests
@@ -27,9 +28,9 @@ namespace IntegrationTests
 	{
 		private readonly ConnectionManager _connectionManager;
 
-		public TestExecutor(string connectionString, TimeSpan delay, int maxRetries)
+		public TestExecutor(string connectionString, RetryPolicy retryPolicy)
 		{
-			_connectionManager = new ConnectionManager(connectionString, delay, maxRetries);
+			_connectionManager = new ConnectionManager(connectionString, retryPolicy);
 		}
 
 		public TestResult Execute(Guid id, int attempts, string errorType)

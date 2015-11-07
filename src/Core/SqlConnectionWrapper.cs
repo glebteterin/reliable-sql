@@ -1,34 +1,26 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
 	public class SqlConnectionWrapper : IDbConnection
 	{
 		private readonly SqlConnection _connection;
-		private readonly int _maxRetries;
-		private readonly TimeSpan _delay;
+		private readonly RetryPolicy _retryPolicy;
 
 		private string _connectionString;
 
-		public SqlConnectionWrapper(string connectionString, TimeSpan delay, int maxRetries)
+		public SqlConnectionWrapper(string connectionString, RetryPolicy retryPolicy)
 		{
 			if (connectionString == null) throw new ArgumentNullException("connectionString");
+			if (retryPolicy == null) throw new ArgumentNullException("retryPolicy");
 
 			_connectionString = connectionString;
-			_delay = delay;
-			_maxRetries = maxRetries;
+			_retryPolicy = retryPolicy;
 
 			_connection = new SqlConnection(_connectionString);
-		}
-
-		public virtual void Execute(Action<IDbConnection> action)
-		{
-			using (_connection)
-			{
-				SimpleRetry.Do(() => action(_connection), _delay, _maxRetries);
-			}
 		}
 
 		#region IDbConnection implementation
@@ -83,12 +75,18 @@ namespace Sql
 
 		public IDbCommand CreateCommand()
 		{
-			return new SqlCommandWrapper(this, _connection.CreateCommand(), _delay, _maxRetries);
+			return new SqlCommandWrapper(this, _connection.CreateCommand(), _retryPolicy);
 		}
 
 		public void Open()
 		{
-			SimpleRetry.Do(() => _connection.Open(), _delay, _maxRetries);
+			_retryPolicy.ExecuteAction(() =>
+			{
+				if (_connection.State != ConnectionState.Open)
+				{
+					_connection.Open();
+				}
+			});
 		}
 
 		#region IDisposable implementation

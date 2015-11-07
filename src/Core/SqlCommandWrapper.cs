@@ -1,68 +1,66 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
 	public class SqlCommandWrapper : IDbCommand
 	{
 		private readonly SqlCommand _sqlCommandToWrap;
-
-		private readonly TimeSpan _delay;
-		private readonly int _maxRetries;
+		private readonly RetryPolicy _retryPolicy;
 
 		private SqlConnectionWrapper _currentConnection;
 
-		public SqlCommandWrapper(SqlConnectionWrapper currentConnection, SqlCommand sqlCommandToWrap, TimeSpan delay, int maxRetries)
+		public SqlCommandWrapper(SqlConnectionWrapper currentConnection, SqlCommand sqlCommandToWrap, RetryPolicy retryPolicy)
 		{
 			_currentConnection = currentConnection;
 			_sqlCommandToWrap = sqlCommandToWrap;
-			_delay = delay;
-			_maxRetries = maxRetries;
+			_retryPolicy = retryPolicy;
 		}
 
 		public int ExecuteNonQuery()
 		{
-			return SimpleRetry.Do(() =>
+			return _retryPolicy.ExecuteAction(() =>
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
 				return _sqlCommandToWrap.ExecuteNonQuery();
-			}, _delay, _maxRetries);
+			});
 		}
 
 		public IDataReader ExecuteReader()
 		{
-			return SimpleRetry.Do(() =>
+			return _retryPolicy.ExecuteAction(() =>
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
 				return _sqlCommandToWrap.ExecuteReader();
-			}, _delay, _maxRetries);
+			});
 		}
 
 		public IDataReader ExecuteReader(CommandBehavior behavior)
 		{
-			return SimpleRetry.Do(() =>
+			return _retryPolicy.ExecuteAction(() =>
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
 				return _sqlCommandToWrap.ExecuteReader(behavior);
-			}, _delay, _maxRetries);
+			});
 		}
 
 		public object ExecuteScalar()
 		{
-			return SimpleRetry.Do(() =>
+			return _retryPolicy.ExecuteAction(() =>
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
 				return _sqlCommandToWrap.ExecuteScalar();
-			}, _delay, _maxRetries);
+			});
 		}
 
 		#region IDbCommand proxy implementation
