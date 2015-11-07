@@ -23,22 +23,46 @@ namespace Sql
 
 		public int ExecuteNonQuery()
 		{
-			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteNonQuery(), _delay, _maxRetries);
+			return SimpleRetry.Do(() =>
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				return _sqlCommandToWrap.ExecuteNonQuery();
+			}, _delay, _maxRetries);
 		}
 
 		public IDataReader ExecuteReader()
 		{
-			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteReader(), _delay, _maxRetries);
+			return SimpleRetry.Do(() =>
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				return _sqlCommandToWrap.ExecuteReader();
+			}, _delay, _maxRetries);
 		}
 
 		public IDataReader ExecuteReader(CommandBehavior behavior)
 		{
-			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteReader(behavior), _delay, _maxRetries);
+			return SimpleRetry.Do(() =>
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				return _sqlCommandToWrap.ExecuteReader(behavior);
+			}, _delay, _maxRetries);
 		}
 
 		public object ExecuteScalar()
 		{
-			return SimpleRetry.Do(() => _sqlCommandToWrap.ExecuteScalar(), _delay, _maxRetries);
+			return SimpleRetry.Do(() =>
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				return _sqlCommandToWrap.ExecuteScalar();
+			}, _delay, _maxRetries);
 		}
 
 		#region IDbCommand proxy implementation

@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Data.SqlClient;
+using System.Data;
 using NUnit.Framework;
+using Sql;
 
 namespace IntegrationTests
 {
@@ -45,6 +46,22 @@ namespace IntegrationTests
 			Assert.That(testResult.ThrownException, Is.TypeOf<AggregateException>());
 			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions.Count, Is.EqualTo(1));
 			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions[0].Message.Contains("not usable"));
+		}
+
+		[Test]
+		public void NotOpenedConnection_ShouldBeOpened()
+		{
+			var wrapper = new SqlConnectionWrapper(Config.ConnectionString, TimeSpan.Zero, 1);
+
+			var command = wrapper.CreateCommand();
+			command.CommandText = "SELECT 1";
+
+			if (wrapper.State != ConnectionState.Closed)
+				throw new Exception("It's necessary for the test to keep connection closed.");
+
+			int resul = (int)command.ExecuteScalar();
+
+			Assert.That(resul, Is.EqualTo(1));
 		}
 
 		private static TestExecutor InitExecutor(string connectionString, TimeSpan delay, int retries)
