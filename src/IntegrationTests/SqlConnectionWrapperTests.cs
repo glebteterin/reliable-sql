@@ -18,7 +18,8 @@ namespace IntegrationTests
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
 			Assert.That(testResult.ThrownException, Is.Not.Null);
-			Assert.That(testResult.ThrownException, Is.TypeOf<InvalidOperationException>());
+			Assert.That(testResult.ThrownException, Is.TypeOf<AggregateException>());
+			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions.Count, Is.EqualTo(2));
 		}
 
 		[Test]
@@ -29,7 +30,8 @@ namespace IntegrationTests
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
 			Assert.That(testResult.ThrownException, Is.Not.Null);
-			Assert.That(testResult.ThrownException, Is.TypeOf<SqlException>());
+			Assert.That(testResult.ThrownException, Is.TypeOf<AggregateException>());
+			Assert.That(((AggregateException)testResult.ThrownException).InnerExceptions.Count, Is.EqualTo(2));
 		}
 
 		[Test]

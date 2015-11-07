@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
 using Sql;
@@ -30,7 +29,7 @@ namespace IntegrationTests
 
 		public TestExecutor(string connectionString, TimeSpan delay, int maxRetries)
 		{
-			_wrapper = new SqlConnectionWrapper(new SqlConnection(connectionString), delay, maxRetries);
+			_wrapper = new SqlConnectionWrapper(connectionString, delay, maxRetries);
 		}
 
 		public TestResult Execute(Guid id, int attempts, string errorType)

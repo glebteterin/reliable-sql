@@ -13,19 +13,23 @@ namespace Sql
 		private readonly int _maxRetries;
 		private readonly TimeSpan _delay;
 
-		public SqlConnectionWrapper(SqlConnection connection)
-			: this(connection, DefaultDelay, DefaultMaxRetries)
+		private string _connectionString;
+
+		public SqlConnectionWrapper(string connectionString)
+			: this(connectionString, DefaultDelay, DefaultMaxRetries)
 		{
 			
 		}
 
-		public SqlConnectionWrapper(SqlConnection connection, TimeSpan delay, int maxRetries)
+		public SqlConnectionWrapper(string connectionString, TimeSpan delay, int maxRetries)
 		{
-			if (connection == null) throw new ArgumentNullException("connection");
+			if (connectionString == null) throw new ArgumentNullException("connectionString");
 
-			_connection = connection;
+			_connectionString = connectionString;
 			_delay = delay;
 			_maxRetries = maxRetries;
+
+			_connection = new SqlConnection(_connectionString);
 		}
 
 		public virtual void Execute(Action<IDbConnection> action)
@@ -42,10 +46,11 @@ namespace Sql
 		{
 			get
 			{
-				return _connection.ConnectionString;
+				return _connectionString;
 			}
 			set
 			{
+				_connectionString = value;
 				_connection.ConnectionString = value;
 			}
 		}
@@ -92,7 +97,7 @@ namespace Sql
 
 		public void Open()
 		{
-			_connection.Open();
+			SimpleRetry.Do(() => _connection.Open(), _delay, _maxRetries);
 		}
 
 		#region IDisposable implementation
