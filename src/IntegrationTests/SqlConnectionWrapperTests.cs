@@ -38,7 +38,7 @@ namespace IntegrationTests
 		}
 
 		[Test]
-		public void SqlExcption_NotUsable()
+		public void SqlException_NotUsable()
 		{
 			var executor = InitExecutor(Config.ConnectionString, 0, 1);
 
