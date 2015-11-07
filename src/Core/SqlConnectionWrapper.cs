@@ -6,20 +6,11 @@ namespace Sql
 {
 	public class SqlConnectionWrapper : IDbConnection
 	{
-		private const int DefaultMaxRetries = 10;
-		private static readonly TimeSpan DefaultDelay = new TimeSpan(0,0,0,0,100);
-
 		private readonly SqlConnection _connection;
 		private readonly int _maxRetries;
 		private readonly TimeSpan _delay;
 
 		private string _connectionString;
-
-		public SqlConnectionWrapper(string connectionString)
-			: this(connectionString, DefaultDelay, DefaultMaxRetries)
-		{
-			
-		}
 
 		public SqlConnectionWrapper(string connectionString, TimeSpan delay, int maxRetries)
 		{

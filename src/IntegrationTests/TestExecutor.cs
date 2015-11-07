@@ -25,11 +25,11 @@ namespace IntegrationTests
 
 	public class TestExecutor
 	{
-		private readonly SqlConnectionWrapper _wrapper;
+		private readonly ConnectionManager _connectionManager;
 
 		public TestExecutor(string connectionString, TimeSpan delay, int maxRetries)
 		{
-			_wrapper = new SqlConnectionWrapper(connectionString, delay, maxRetries);
+			_connectionManager = new ConnectionManager(connectionString, delay, maxRetries);
 		}
 
 		public TestResult Execute(Guid id, int attempts, string errorType)
@@ -46,7 +46,7 @@ namespace IntegrationTests
 
 			try
 			{
-				returnedValue = _wrapper
+				returnedValue = _connectionManager.CreateConnection()
 									.Query<string>(
 										"SqlWrapperTest",
 										commandType: CommandType.StoredProcedure,
