@@ -20,6 +20,7 @@ namespace IntegrationTests
 
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
+			Assert.That(testResult.RetryCount, Is.EqualTo(0));
 			Assert.That(testResult.ThrownException, Is.Not.Null);
 			Assert.That(testResult.ThrownException, Is.TypeOf<InvalidOperationException>());
 		}
@@ -31,6 +32,7 @@ namespace IntegrationTests
 
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
+			Assert.That(testResult.RetryCount, Is.EqualTo(0));
 			Assert.That(testResult.ThrownException, Is.Not.Null);
 			Assert.That(testResult.ThrownException, Is.TypeOf<SqlException>());
 		}
@@ -42,11 +44,12 @@ namespace IntegrationTests
 
 			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
 
+			Assert.That(testResult.RetryCount, Is.EqualTo(1));
 			Assert.That(testResult.ThrownException, Is.Not.Null);
 			Assert.That(testResult.ThrownException, Is.TypeOf<SqlException>());
 			Assert.That(((SqlException)testResult.ThrownException).Message.Contains("not usable"));
 		}
-
+		
 		[Test]
 		public void NotOpenedConnection_ShouldBeOpened()
 		{
@@ -72,7 +75,7 @@ namespace IntegrationTests
 
 		private static RetryPolicy CreateRetryPolicy(int delayMs, int maxRetries)
 		{
-			return new RetryPolicy(new SqlDatabaseTransientErrorDetectionStrategy(), maxRetries, TimeSpan.FromMilliseconds(delayMs));
+			return new RetryPolicy(new AzureSqlStrategy(), maxRetries, TimeSpan.FromMilliseconds(delayMs));
 		}
 	}
 }

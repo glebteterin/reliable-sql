@@ -11,15 +11,18 @@ namespace IntegrationTests
 	{
 		public Exception ThrownException { get; set; }
 
+		public int RetryCount { get; set; }
+
 		public string Result { get; set; }
 
 		public TestResult()
 		{
 		}
 
-		public TestResult(Exception thrownException, string result)
+		public TestResult(Exception thrownException, int retryCount, string result)
 		{
 			ThrownException = thrownException;
+			RetryCount = retryCount;
 			Result = result;
 		}
 	}
@@ -37,6 +40,7 @@ namespace IntegrationTests
 		{
 			var catchedException = default(Exception);
 			var returnedValue = "";
+			var retryCount = 0;
 
 			var param = new
 			{
@@ -44,6 +48,8 @@ namespace IntegrationTests
 				errorRepeat = attempts,
 				errorType = errorType
 			};
+
+			_connectionManager.Retrying += (sender, args) => ++retryCount;
 
 			try
 			{
@@ -59,7 +65,7 @@ namespace IntegrationTests
 				catchedException = ex;
 			}
 
-			return new TestResult(catchedException, returnedValue);
+			return new TestResult(catchedException, retryCount, returnedValue);
 		}
 	}
 }

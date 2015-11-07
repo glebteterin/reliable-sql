@@ -12,11 +12,13 @@ namespace Sql
 		private readonly string _connectionString;
 		private readonly RetryPolicy _globalRetryPolicy;
 
+		public event EventHandler<RetryingEventArgs> Retrying;
+
 		private static RetryPolicy DefaultRetryPolicy
 		{
 			get
 			{
-				return new RetryPolicy(new SqlDatabaseTransientErrorDetectionStrategy(), DefaultMaxRetries, TimeSpan.FromMilliseconds(DefaultDelayMs));
+				return new RetryPolicy(new AzureSqlStrategy(), DefaultMaxRetries, TimeSpan.FromMilliseconds(DefaultDelayMs));
 			}
 		}
 
@@ -31,6 +33,7 @@ namespace Sql
 
 			_connectionString = connectionString;
 			_globalRetryPolicy = retryPolicy;
+			_globalRetryPolicy.Retrying += GlobalConnectionPolicyOnRetrying;
 		}
 
 		public virtual SqlConnectionWrapper CreateConnection()
@@ -45,6 +48,15 @@ namespace Sql
 			using (var cnn = CreateConnection())
 			{
 				action(cnn);
+			}
+		}
+
+		private void GlobalConnectionPolicyOnRetrying(object sender, RetryingEventArgs retryingEventArgs)
+		{
+			if (Retrying != null)
+			{
+				var ev = Retrying;
+				ev(sender, retryingEventArgs);
 			}
 		}
 	}
