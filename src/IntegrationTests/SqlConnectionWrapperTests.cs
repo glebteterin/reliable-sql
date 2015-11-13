@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
+using Dapper;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using NUnit.Framework;
 using Sql;
