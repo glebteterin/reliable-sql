@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
 	public class SqlCommandWrapper : IDbCommand
 	{
+		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
+
 		private readonly SqlCommand _sqlCommandToWrap;
 		private readonly RetryPolicy _retryPolicy;
 
@@ -21,6 +24,8 @@ namespace Sql
 
 		public int ExecuteNonQuery()
 		{
+			Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteNonQuery");
+
 			return _retryPolicy.ExecuteAction(() =>
 			{
 				if (Connection.State != ConnectionState.Open)
@@ -34,6 +39,8 @@ namespace Sql
 		{
 			return _retryPolicy.ExecuteAction(() =>
 			{
+				Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteReader");
+
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
@@ -45,6 +52,8 @@ namespace Sql
 		{
 			return _retryPolicy.ExecuteAction(() =>
 			{
+				Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteReader {0}", behavior);
+
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
@@ -56,6 +65,8 @@ namespace Sql
 		{
 			return _retryPolicy.ExecuteAction(() =>
 			{
+				Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteScalar");
+
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 

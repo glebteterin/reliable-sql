@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
 	public class ConnectionManager
 	{
+		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
+
 		private const int DefaultMaxRetries = 10;
 		private const int DefaultDelayMs = 100;
 
@@ -38,6 +41,8 @@ namespace Sql
 
 		public virtual SqlConnectionWrapper CreateConnection()
 		{
+			Tracer.TraceEvent(TraceEventType.Verbose, 0, "ConnectionManager: Creating connection");
+
 			return new SqlConnectionWrapper(
 				_connectionString,
 				_globalRetryPolicy);

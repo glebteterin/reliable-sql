@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
 	public class SqlConnectionWrapper : IDbConnection
 	{
+		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
+
 		private readonly SqlConnection _connection;
 		private readonly RetryPolicy _retryPolicy;
 
@@ -84,7 +87,11 @@ namespace Sql
 			{
 				if (_connection.State != ConnectionState.Open)
 				{
+					Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlConnectionWrapper: opening connection");
+
 					_connection.Open();
+
+					Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlConnectionWrapper: connection opened");
 				}
 			});
 		}
