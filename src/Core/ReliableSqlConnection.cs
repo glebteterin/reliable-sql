@@ -6,7 +6,7 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
-	public class SqlConnectionWrapper : IDbConnection
+	public class ReliableSqlConnection : IDbConnection
 	{
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
 
@@ -15,7 +15,7 @@ namespace Sql
 
 		private string _connectionString;
 
-		public SqlConnectionWrapper(string connectionString, RetryPolicy retryPolicy)
+		public ReliableSqlConnection(string connectionString, RetryPolicy retryPolicy)
 		{
 			if (connectionString == null) throw new ArgumentNullException("connectionString");
 			if (retryPolicy == null) throw new ArgumentNullException("retryPolicy");
@@ -78,7 +78,7 @@ namespace Sql
 
 		public IDbCommand CreateCommand()
 		{
-			return new SqlCommandWrapper(this, _connection.CreateCommand(), _retryPolicy);
+			return new ReliableSqlCommand(this, _connection.CreateCommand(), _retryPolicy);
 		}
 
 		public void Open()
@@ -87,11 +87,11 @@ namespace Sql
 			{
 				if (_connection.State != ConnectionState.Open)
 				{
-					Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlConnectionWrapper: opening connection");
+					Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlConnection: opening connection");
 
 					_connection.Open();
 
-					Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlConnectionWrapper: connection opened");
+					Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlConnection: connection opened");
 				}
 			});
 		}

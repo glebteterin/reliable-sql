@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using NUnit.Framework;
 using Sql;
+using ReliableSqlConnection = Sql.ReliableSqlConnection;
 
 namespace IntegrationTests
 {
@@ -53,7 +54,7 @@ namespace IntegrationTests
 		[Test]
 		public void NotOpenedConnection_ShouldBeOpened()
 		{
-			var wrapper = new SqlConnectionWrapper(Config.ConnectionString, CreateRetryPolicy(0, 1));
+			var wrapper = new ReliableSqlConnection(Config.ConnectionString, CreateRetryPolicy(0, 1));
 
 			var command = wrapper.CreateCommand();
 			command.CommandText = "SELECT 1";

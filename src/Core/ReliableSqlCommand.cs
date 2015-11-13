@@ -6,16 +6,16 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace Sql
 {
-	public class SqlCommandWrapper : IDbCommand
+	public class ReliableSqlCommand : IDbCommand
 	{
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
 
 		private readonly SqlCommand _sqlCommandToWrap;
 		private readonly RetryPolicy _retryPolicy;
 
-		private SqlConnectionWrapper _currentConnection;
+		private ReliableSqlConnection _currentConnection;
 
-		public SqlCommandWrapper(SqlConnectionWrapper currentConnection, SqlCommand sqlCommandToWrap, RetryPolicy retryPolicy)
+		public ReliableSqlCommand(ReliableSqlConnection currentConnection, SqlCommand sqlCommandToWrap, RetryPolicy retryPolicy)
 		{
 			_currentConnection = currentConnection;
 			_sqlCommandToWrap = sqlCommandToWrap;
@@ -24,7 +24,7 @@ namespace Sql
 
 		public int ExecuteNonQuery()
 		{
-			Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteNonQuery");
+			Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteNonQuery");
 
 			return _retryPolicy.ExecuteAction(() =>
 			{
@@ -39,7 +39,7 @@ namespace Sql
 		{
 			return _retryPolicy.ExecuteAction(() =>
 			{
-				Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteReader");
+				Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteReader");
 
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
@@ -52,7 +52,7 @@ namespace Sql
 		{
 			return _retryPolicy.ExecuteAction(() =>
 			{
-				Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteReader {0}", behavior);
+				Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteReader {0}", behavior);
 
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
@@ -65,7 +65,7 @@ namespace Sql
 		{
 			return _retryPolicy.ExecuteAction(() =>
 			{
-				Tracer.TraceEvent(TraceEventType.Verbose, 0, "SqlCommandWrapper => ExecuteScalar");
+				Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteScalar");
 
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
@@ -81,12 +81,12 @@ namespace Sql
 			get { return _currentConnection; }
 			set
 			{
-				SqlConnectionWrapper cnn = null;
+				ReliableSqlConnection cnn = null;
 
 				if (value == null)
 					throw new ArgumentNullException();
 
-				if ((cnn = (value as SqlConnectionWrapper)) == null)
+				if ((cnn = (value as ReliableSqlConnection)) == null)
 					throw new ArgumentException(string.Format("Unsupported connection type ({0})",
 						value.GetType().Name));
 

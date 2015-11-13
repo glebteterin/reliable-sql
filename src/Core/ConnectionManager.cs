@@ -39,11 +39,11 @@ namespace Sql
 			_globalRetryPolicy.Retrying += GlobalConnectionPolicyOnRetrying;
 		}
 
-		public virtual SqlConnectionWrapper CreateConnection()
+		public virtual ReliableSqlConnection CreateConnection()
 		{
 			Tracer.TraceEvent(TraceEventType.Verbose, 0, "ConnectionManager: Creating connection");
 
-			return new SqlConnectionWrapper(
+			return new ReliableSqlConnection(
 				_connectionString,
 				_globalRetryPolicy);
 		}
