@@ -15,8 +15,12 @@ namespace Sql
 
 		private ReliableSqlConnection _currentConnection;
 
-		public ReliableSqlCommand(ReliableSqlConnection currentConnection, SqlCommand sqlCommandToWrap, RetryPolicy retryPolicy)
+		internal ReliableSqlCommand(ReliableSqlConnection currentConnection, SqlCommand sqlCommandToWrap, RetryPolicy retryPolicy)
 		{
+			Debug.Assert(currentConnection != null, "currentConnection param is null");
+			Debug.Assert(sqlCommandToWrap != null, "sqlCommandToWrap param is null");
+			Debug.Assert(retryPolicy != null, "retryPolicy param is null");
+
 			_currentConnection = currentConnection;
 			_sqlCommandToWrap = sqlCommandToWrap;
 			_retryPolicy = retryPolicy;
