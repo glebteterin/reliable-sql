@@ -3,7 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using NUnit.Framework;
-using ReliableSqlConnection = Sql.ReliableSqlConnection;
+using ReliableSqlConnection = GlebTeterin.ReliableSql.ReliableSqlConnection;
 
 namespace IntegrationTests
 {

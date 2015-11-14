@@ -1,4 +1,4 @@
-﻿namespace Sql
+﻿namespace GlebTeterin.ReliableSql
 {
 	public class Constants
 	{

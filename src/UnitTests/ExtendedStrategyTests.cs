@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using Sql;
+using GlebTeterin.ReliableSql;
 
 namespace UnitTests
 {

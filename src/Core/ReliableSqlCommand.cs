@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
-namespace Sql
+namespace GlebTeterin.ReliableSql
 {
 	public class ReliableSqlCommand : IDbCommand
 	{

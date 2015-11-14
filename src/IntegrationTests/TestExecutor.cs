@@ -3,7 +3,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
-using Sql;
+using GlebTeterin.ReliableSql;
 
 namespace IntegrationTests
 {
