@@ -36,7 +36,7 @@ namespace IntegrationTests
 			_connectionManager = new ConnectionManager(connectionString, retryPolicy);
 		}
 
-		public TestResult Execute(Guid id, int attempts, string errorType)
+		public TestResult Execute(Guid id, int attempts, int errorNumber, string errorMessage)
 		{
 			var catchedException = default(Exception);
 			var returnedValue = "";
@@ -46,7 +46,8 @@ namespace IntegrationTests
 			{
 				id = id,
 				errorRepeat = attempts,
-				errorType = errorType
+				errorNumber = errorNumber,
+				errorMessage = errorMessage
 			};
 
 			_connectionManager.Retrying += (sender, args) => ++retryCount;

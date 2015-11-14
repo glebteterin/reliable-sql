@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using Dapper;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 using NUnit.Framework;
-using Sql;
 using ReliableSqlConnection = Sql.ReliableSqlConnection;
 
 namespace IntegrationTests
 {
 	[TestFixture]
-	public class SqlConnectionWrapperTests
+	public class SqlConnectionTests
 	{
 		private const string EmptyConnectionString = "";
 		private const string FakeConnectionString = "Data Source=test\test;Initial Catalog=Test; Connect Timeout=1; Connection Timeout=1; Pooling=false; Persist Security Info=True;User ID=Test; password=test ";
@@ -21,7 +18,7 @@ namespace IntegrationTests
 		{
 			var executor = InitExecutor(EmptyConnectionString, 0, 2);
 
-			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
+			var testResult = executor.Execute(Guid.NewGuid(), 2, 50001, "custom error");
 
 			Assert.That(testResult.RetryCount, Is.EqualTo(0));
 			Assert.That(testResult.ThrownException, Is.Not.Null);
@@ -33,7 +30,7 @@ namespace IntegrationTests
 		{
 			var executor = InitExecutor(FakeConnectionString, 0, 2);
 
-			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
+			var testResult = executor.Execute(Guid.NewGuid(), 2, 50001, "custom error");
 
 			Assert.That(testResult.RetryCount, Is.EqualTo(0));
 			Assert.That(testResult.ThrownException, Is.Not.Null);
@@ -45,12 +42,12 @@ namespace IntegrationTests
 		{
 			var executor = InitExecutor(Config.ConnectionString, 0, 1);
 
-			var testResult = executor.Execute(Guid.NewGuid(), 2, "NOTUSABLE");
+			var testResult = executor.Execute(Guid.NewGuid(), 2, 50002, "custom error");
 
 			Assert.That(testResult.RetryCount, Is.EqualTo(1));
 			Assert.That(testResult.ThrownException, Is.Not.Null);
 			Assert.That(testResult.ThrownException, Is.TypeOf<SqlException>());
-			Assert.That(((SqlException)testResult.ThrownException).Message.Contains("not usable"));
+			Assert.That(((SqlException)testResult.ThrownException).Message, Is.EqualTo("custom error"));
 		}
 		
 		[Test]
@@ -78,7 +75,7 @@ namespace IntegrationTests
 
 		private static RetryPolicy CreateRetryPolicy(int delayMs, int maxRetries)
 		{
-			return new RetryPolicy(new AzureSqlStrategy(), maxRetries, TimeSpan.FromMilliseconds(delayMs));
+			return new RetryPolicy(new MockRetryStrategy(), maxRetries, TimeSpan.FromMilliseconds(delayMs));
 		}
 	}
 }

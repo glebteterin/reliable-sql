@@ -7,7 +7,8 @@ GO
 CREATE PROCEDURE [SqlWrapperTest]
 	@id UNIQUEIDENTIFIER,
 	@errorRepeat INT,
-	@errorType VARCHAR(100)
+	@errorNumber INT,
+	@errorMessage VARCHAR(300)
 AS
 BEGIN
 
@@ -37,12 +38,7 @@ BEGIN
 		INSERT INTO [SqlWrapperTestLog]([Id],[Count]) VALUES(@id, @errorRepeat);
 
 	IF (@counter > 0)
-		BEGIN
-			IF (@errorType = 'NOTUSABLE')
-				RAISERROR ('physical connection is not usable',17,1)
-			ELSE IF (@errorType = 'TIMEOUT')
-				RAISERROR ('timeout expired',17,1)
-		END
+		THROW @errorNumber, @errorMessage, 1;
 	ELSE
 		BEGIN
 			SELECT 'SUCCESS'

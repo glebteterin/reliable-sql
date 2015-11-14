@@ -53,8 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="MockRetryStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlConnectionWrapperTests.cs" />
+    <Compile Include="SqlConnectionTests.cs" />
     <Compile Include="SqlExceptionBuilder.cs" />
     <Compile Include="TestExecutor.cs" />
   </ItemGroup>
