@@ -64,9 +64,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
+    <ProjectReference Include="..\Core\ReliableSql.csproj">
       <Project>{8D92CEB5-BF93-40E4-B46A-DF621FC2AB58}</Project>
-      <Name>Core</Name>
+      <Name>ReliableSql</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

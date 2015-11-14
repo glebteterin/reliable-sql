@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{8D92CEB5-BF93-40E4-B46A-DF621FC2AB58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReliableSql", "Core\ReliableSql.csproj", "{8D92CEB5-BF93-40E4-B46A-DF621FC2AB58}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{57C1F7BB-7922-40DD-9567-D7F673FF4456}"
 EndProject

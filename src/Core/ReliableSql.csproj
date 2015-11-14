@@ -7,8 +7,8 @@
     <ProjectGuid>{8D92CEB5-BF93-40E4-B46A-DF621FC2AB58}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sql</RootNamespace>
-    <AssemblyName>Sql</AssemblyName>
+    <RootNamespace>GlebTeterin.ReliableSql</RootNamespace>
+    <AssemblyName>GlebTeterin.ReliableSql</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
