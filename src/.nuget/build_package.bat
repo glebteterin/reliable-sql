@@ -1,0 +1,1 @@
+nuget.exe pack ../Core/ReliableSql.csproj -Verbosity detailed
