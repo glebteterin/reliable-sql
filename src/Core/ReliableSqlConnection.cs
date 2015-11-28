@@ -6,6 +6,9 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace GlebTeterin.ReliableSql
 {
+	/// <summary>
+	/// Implementation of retry logic for SqlConnection.
+	/// </summary>
 	public class ReliableSqlConnection : IDbConnection
 	{
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
@@ -28,6 +31,9 @@ namespace GlebTeterin.ReliableSql
 
 		#region IDbConnection implementation
 
+		/// <summary>
+		/// Gets or sets the string used to open a SQL Server database.
+		/// </summary>
 		public string ConnectionString
 		{
 			get
@@ -41,46 +47,73 @@ namespace GlebTeterin.ReliableSql
 			}
 		}
 
+		/// <summary>
+		/// Gets the time to wait while trying to establish a connection before terminating the attempt and generating an error.
+		/// </summary>
 		public int ConnectionTimeout
 		{
 			get { return _connection.ConnectionTimeout; }
 		}
 
+		/// <summary>
+		/// Gets the name of the current database or the database to be used after a connection is opened.
+		/// </summary>
 		public string Database
 		{
 			get { return _connection.Database; }
 		}
 
+		/// <summary>
+		/// Indicates the state of the <see cref="T:GlebTeterin.ReliableSql.ReliableSqlConnection"/> during the most recent network operation performed on the connection.
+		/// </summary>
 		public ConnectionState State
 		{
 			get { return _connection.State; }
 		}
 
+		/// <summary>
+		/// Starts a database transaction.
+		/// </summary>
 		public IDbTransaction BeginTransaction()
 		{
 			return _connection.BeginTransaction();
 		}
 
+		/// <summary>
+		/// Starts a database transaction with the specified isolation level.
+		/// </summary>
 		public IDbTransaction BeginTransaction(IsolationLevel iso)
 		{
 			return _connection.BeginTransaction(iso);
 		}
 
+		/// <summary>
+		/// Closes the connection to the database. This is the preferred method of closing any open connection.
+		/// </summary>
 		public void Close()
 		{
 			_connection.Close();
 		}
 
+		/// <summary>
+		/// Changes the current database for an open <see cref="T:GlebTeterin.ReliableSql.ReliableSqlCommand"/>.
+		/// </summary>
 		public void ChangeDatabase(string databaseName)
 		{
 			_connection.ChangeDatabase(databaseName);
 		}
 
+		/// <summary>
+		/// Creates and returns a <see cref="T:GlebTeterin.ReliableSql.ReliableSqlCommand"/> object associated with the <see cref="T:GlebTeterin.ReliableSql.ReliableSqlConnection"/>.
+		/// </summary>
 		public IDbCommand CreateCommand()
 		{
 			return new ReliableSqlCommand(this, _connection.CreateCommand(), _retryPolicy);
 		}
 
+		/// <summary>
+		/// Opens a database connection with the property settings specified by the <see cref="P:GlebTeterin.ReliableSql.ReliableSqlConnection.ConnectionString"/>.
+		/// </summary>
 		public void Open()
 		{
 			_retryPolicy.ExecuteAction(() =>

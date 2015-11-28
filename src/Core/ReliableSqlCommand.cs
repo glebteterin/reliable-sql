@@ -6,6 +6,9 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace GlebTeterin.ReliableSql
 {
+	/// <summary>
+	/// Implementation of retry logic for SqlCommand.
+	/// </summary>
 	public class ReliableSqlCommand : IDbCommand
 	{
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
@@ -26,6 +29,9 @@ namespace GlebTeterin.ReliableSql
 			_retryPolicy = retryPolicy;
 		}
 
+		/// <summary>
+		/// Executes a Transact-SQL statement against the connection and returns the number of rows affected.
+		/// </summary>
 		public int ExecuteNonQuery()
 		{
 			Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteNonQuery");
@@ -39,6 +45,9 @@ namespace GlebTeterin.ReliableSql
 			});
 		}
 
+		/// <summary>
+		/// Sends the <see cref="P:GlebTeterin.ReliableSql.ReliableSqlCommand.CommandText"/> to the <see cref="P:GlebTeterin.ReliableSql.ReliableSqlCommand.Connection"/> and builds a <see cref="T:System.Data.SqlClient.SqlDataReader"/>.
+		/// </summary>
 		public IDataReader ExecuteReader()
 		{
 			return _retryPolicy.ExecuteAction(() =>
@@ -52,6 +61,9 @@ namespace GlebTeterin.ReliableSql
 			});
 		}
 
+		/// <summary>
+		/// Sends the <see cref="P:GlebTeterin.ReliableSql.ReliableSqlCommand.CommandText"/> to the <see cref="P:GlebTeterin.ReliableSql.ReliableSqlCommand.Connection"/>, and builds a <see cref="T:System.Data.SqlClient.SqlDataReader"/> using one of the <see cref="T:System.Data.CommandBehavior"/> values.
+		/// </summary>
 		public IDataReader ExecuteReader(CommandBehavior behavior)
 		{
 			return _retryPolicy.ExecuteAction(() =>
@@ -65,6 +77,9 @@ namespace GlebTeterin.ReliableSql
 			});
 		}
 
+		/// <summary>
+		/// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+		/// </summary>
 		public object ExecuteScalar()
 		{
 			return _retryPolicy.ExecuteAction(() =>
@@ -80,6 +95,9 @@ namespace GlebTeterin.ReliableSql
 
 		#region IDbCommand proxy implementation
 
+		/// <summary>
+		/// Gets or sets the <see cref="T:GlebTeterin.ReliableSql.ReliableSqlConnection"/> used by this instance of the <see cref="T:GlebTeterin.ReliableSql.ReliableSqlCommand"/>.
+		/// </summary>
 		public IDbConnection Connection
 		{
 			get { return _currentConnection; }
@@ -98,6 +116,9 @@ namespace GlebTeterin.ReliableSql
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the <see cref="T:System.Data.SqlClient.SqlTransaction"/> within which the <see cref="T:GlebTeterin.ReliableSql.ReliableSqlCommand"/> executes.
+		/// </summary>
 		public IDbTransaction Transaction
 		{
 			get
@@ -122,29 +143,44 @@ namespace GlebTeterin.ReliableSql
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the Transact-SQL statement, table name or stored procedure to execute at the data source.
+		/// </summary>
 		public string CommandText
 		{
 			get { return _sqlCommandToWrap.CommandText; }
 			set { _sqlCommandToWrap.CommandText = value; }
 		}
 
+		/// <summary>
+		/// Gets or sets the wait time before terminating the attempt to execute a command and generating an error.
+		/// </summary>
 		public int CommandTimeout
 		{
 			get { return _sqlCommandToWrap.CommandTimeout; }
 			set { _sqlCommandToWrap.CommandTimeout = value; }
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating how the <see cref="P:GlebTeterin.ReliableSql.ReliableSqlCommand.CommandText"/> property is to be interpreted.
+		/// </summary>
 		public CommandType CommandType
 		{
 			get { return _sqlCommandToWrap.CommandType; }
 			set { _sqlCommandToWrap.CommandType = value; }
 		}
 
+		/// <summary>
+		/// Gets the <see cref="T:System.Data.SqlClient.SqlParameterCollection"/>.
+		/// </summary>
 		public IDataParameterCollection Parameters
 		{
 			get { return _sqlCommandToWrap.Parameters; }
 		}
 
+		/// <summary>
+		/// Gets or sets how command results are applied to the <see cref="T:System.Data.DataRow"/> when used by the Update method of the <see cref="T:System.Data.Common.DbDataAdapter"/>.
+		/// </summary>
 		public UpdateRowSource UpdatedRowSource
 		{
 			get { return _sqlCommandToWrap.UpdatedRowSource; }
@@ -156,16 +192,25 @@ namespace GlebTeterin.ReliableSql
 			_sqlCommandToWrap.Dispose();
 		}
 
+		/// <summary>
+		/// Creates a prepared version of the command on an instance of SQL Server.
+		/// </summary>
 		public void Prepare()
 		{
 			_sqlCommandToWrap.Prepare();
 		}
 
+		/// <summary>
+		/// Tries to cancel the execution of a <see cref="T:GlebTeterin.ReliableSql.ReliableSqlCommand"/>.
+		/// </summary>
 		public void Cancel()
 		{
 			_sqlCommandToWrap.Cancel();
 		}
 
+		/// <summary>
+		/// Creates a new instance of a <see cref="T:System.Data.SqlClient.SqlParameter"/> object.
+		/// </summary>
 		public IDbDataParameter CreateParameter()
 		{
 			return _sqlCommandToWrap.CreateParameter();

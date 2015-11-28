@@ -5,6 +5,9 @@ using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace GlebTeterin.ReliableSql
 {
+	/// <summary>
+	/// <see cref="P:GlebTeterin.ReliableSql.ReliableSqlConnection"/> factory.
+	/// </summary>
 	public class ConnectionManager
 	{
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
@@ -15,6 +18,9 @@ namespace GlebTeterin.ReliableSql
 		private readonly string _connectionString;
 		private readonly RetryPolicy _globalRetryPolicy;
 
+		/// <summary>
+		/// Occurs when a retry condition is encountered.
+		/// </summary>
 		public event EventHandler<RetryingEventArgs> Retrying;
 
 		private static RetryPolicy DefaultRetryPolicy
@@ -25,11 +31,17 @@ namespace GlebTeterin.ReliableSql
 			}
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with a connection string and default instance of <see cref="P:GlebTeterin.ReliableSql.AzureSqlStrategy"/>.
+		/// </summary>
 		public ConnectionManager(string connectionString)
 			: this(connectionString, DefaultRetryPolicy)
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with a connection string and a <see cref="P:GlebTeterin.ReliableSql.AzureSqlStrategy"/>.
+		/// </summary>
 		public ConnectionManager(string connectionString, RetryPolicy retryPolicy)
 		{
 			if (connectionString == null) throw new ArgumentNullException("connectionString");
@@ -39,6 +51,9 @@ namespace GlebTeterin.ReliableSql
 			_globalRetryPolicy.Retrying += GlobalConnectionPolicyOnRetrying;
 		}
 
+		/// <summary>
+		/// Creates a new instance of <see cref="P:GlebTeterin.ReliableSql.ReliableSqlConnection"/>.
+		/// </summary>
 		public virtual ReliableSqlConnection CreateConnection()
 		{
 			Tracer.TraceEvent(TraceEventType.Verbose, 0, "ConnectionManager: Creating connection");
@@ -48,6 +63,9 @@ namespace GlebTeterin.ReliableSql
 				_globalRetryPolicy);
 		}
 
+		/// <summary>
+		/// Provides a safe way of using <see cref="P:GlebTeterin.ReliableSql.ReliableSqlConnection"/>.
+		/// </summary>
 		public virtual void Execute(Action<IDbConnection> action)
 		{
 			using (var cnn = CreateConnection())
