@@ -14,11 +14,16 @@ namespace GlebTeterin.ReliableSql
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
 
 		private readonly SqlCommand _sqlCommandToWrap;
-		private readonly RetryPolicy _retryPolicy;
+		private readonly SmartRetryPolicy _retryPolicy;
 
 		private ReliableSqlConnection _currentConnection;
 
-		internal ReliableSqlCommand(ReliableSqlConnection currentConnection, SqlCommand sqlCommandToWrap, RetryPolicy retryPolicy)
+		private RetryPolicy RetryPolicy
+		{
+			get { return _retryPolicy.Clone(); }
+		}
+
+		internal ReliableSqlCommand(ReliableSqlConnection currentConnection, SqlCommand sqlCommandToWrap, SmartRetryPolicy retryPolicy)
 		{
 			Debug.Assert(currentConnection != null, "currentConnection param is null");
 			Debug.Assert(sqlCommandToWrap != null, "sqlCommandToWrap param is null");
@@ -36,7 +41,7 @@ namespace GlebTeterin.ReliableSql
 		{
 			Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteNonQuery");
 
-			return _retryPolicy.ExecuteAction(() =>
+			return RetryPolicy.ExecuteAction(() =>
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
@@ -50,7 +55,7 @@ namespace GlebTeterin.ReliableSql
 		/// </summary>
 		public IDataReader ExecuteReader()
 		{
-			return _retryPolicy.ExecuteAction(() =>
+			return RetryPolicy.ExecuteAction(() =>
 			{
 				Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteReader");
 
@@ -66,7 +71,7 @@ namespace GlebTeterin.ReliableSql
 		/// </summary>
 		public IDataReader ExecuteReader(CommandBehavior behavior)
 		{
-			return _retryPolicy.ExecuteAction(() =>
+			return RetryPolicy.ExecuteAction(() =>
 			{
 				Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteReader {0}", behavior);
 
@@ -82,7 +87,7 @@ namespace GlebTeterin.ReliableSql
 		/// </summary>
 		public object ExecuteScalar()
 		{
-			return _retryPolicy.ExecuteAction(() =>
+			return RetryPolicy.ExecuteAction(() =>
 			{
 				Tracer.TraceEvent(TraceEventType.Verbose, 0, "ReliableSqlCommand => ExecuteScalar");
 

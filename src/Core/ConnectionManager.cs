@@ -12,43 +12,58 @@ namespace GlebTeterin.ReliableSql
 	{
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
 
-		private const int DefaultMaxRetries = 10;
-		private const int DefaultDelayMs = 100;
-
 		private readonly string _connectionString;
-		private readonly RetryPolicy _globalRetryPolicy;
+		private readonly SmartRetryPolicy _globalRetryPolicy;
 
 		/// <summary>
 		/// Occurs when a retry condition is encountered.
 		/// </summary>
 		public event EventHandler<RetryingEventArgs> Retrying;
 
-		private static RetryPolicy DefaultRetryPolicy
+		protected ConnectionManager(string connectionString, SmartRetryPolicy retryPolicy)
 		{
-			get
-			{
-				return new RetryPolicy(new AzureSqlStrategy(), DefaultMaxRetries, TimeSpan.FromMilliseconds(DefaultDelayMs));
-			}
+			if (connectionString == null) throw new ArgumentNullException("connectionString");
+			if (retryPolicy == null) throw new ArgumentNullException("retryPolicy");
+
+			_connectionString = connectionString;
+			_globalRetryPolicy = retryPolicy;
+			_globalRetryPolicy.Subscribe(GlobalConnectionPolicyOnRetrying);
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with a connection string and default instance of <see cref="P:GlebTeterin.ReliableSql.AzureSqlStrategy"/>.
 		/// </summary>
 		public ConnectionManager(string connectionString)
-			: this(connectionString, DefaultRetryPolicy)
+			: this(connectionString, ReliableSqlConnection.DefaultRetryPolicy)
 		{
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with a connection string and a <see cref="P:GlebTeterin.ReliableSql.AzureSqlStrategy"/>.
 		/// </summary>
-		public ConnectionManager(string connectionString, RetryPolicy retryPolicy)
+		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, RetryStrategy retryStrategy)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryStrategy))
 		{
-			if (connectionString == null) throw new ArgumentNullException("connectionString");
+		}
 
-			_connectionString = connectionString;
-			_globalRetryPolicy = retryPolicy;
-			_globalRetryPolicy.Retrying += GlobalConnectionPolicyOnRetrying;
+		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount))
+		{
+		}
+
+		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan retryInterval)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, retryInterval))
+		{
+		}
+
+		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan minBackoff, TimeSpan maxBackoff, TimeSpan deltaBackoff)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, minBackoff, maxBackoff, deltaBackoff))
+		{
+		}
+
+		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan initialInterval, TimeSpan increment)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, initialInterval, increment))
+		{
 		}
 
 		/// <summary>
@@ -60,7 +75,7 @@ namespace GlebTeterin.ReliableSql
 
 			return new ReliableSqlConnection(
 				_connectionString,
-				_globalRetryPolicy);
+				_globalRetryPolicy.Clone());
 		}
 
 		/// <summary>

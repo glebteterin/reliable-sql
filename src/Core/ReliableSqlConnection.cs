@@ -14,14 +14,47 @@ namespace GlebTeterin.ReliableSql
 		private readonly static TraceSource Tracer = new TraceSource(Constants.TraceSourceName);
 
 		private readonly SqlConnection _connection;
-		private readonly RetryPolicy _retryPolicy;
+		private readonly SmartRetryPolicy _retryPolicy;
 
 		private string _connectionString;
 
-		public ReliableSqlConnection(string connectionString, RetryPolicy retryPolicy)
+		internal static readonly SmartRetryPolicy DefaultRetryPolicy = new SmartRetryPolicy(new AzureSqlStrategy(), new FixedInterval(Constants.DefaultMaxRetries, TimeSpan.FromMilliseconds(Constants.DefaultDelayMs)));
+
+		public ReliableSqlConnection(string connectionString)
+			: this(connectionString, DefaultRetryPolicy)
+		{
+		}
+
+		public ReliableSqlConnection(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, RetryStrategy retryStrategy)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryStrategy))
+		{
+		}
+
+		public ReliableSqlConnection(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount))
+		{
+		}
+
+		public ReliableSqlConnection(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan retryInterval)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, retryInterval))
+		{
+		}
+
+		public ReliableSqlConnection(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan minBackoff, TimeSpan maxBackoff, TimeSpan deltaBackoff)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, minBackoff, maxBackoff, deltaBackoff))
+		{
+		}
+
+		public ReliableSqlConnection(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan initialInterval, TimeSpan increment)
+			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, initialInterval, increment))
+		{
+		}
+
+		internal ReliableSqlConnection(string connectionString, SmartRetryPolicy retryPolicy)
 		{
 			if (connectionString == null) throw new ArgumentNullException("connectionString");
-			if (retryPolicy == null) throw new ArgumentNullException("retryPolicy");
+
+			Debug.Assert(retryPolicy != null);
 
 			_connectionString = connectionString;
 			_retryPolicy = retryPolicy;
@@ -108,7 +141,7 @@ namespace GlebTeterin.ReliableSql
 		/// </summary>
 		public IDbCommand CreateCommand()
 		{
-			return new ReliableSqlCommand(this, _connection.CreateCommand(), _retryPolicy);
+			return new ReliableSqlCommand(this, _connection.CreateCommand(), _retryPolicy.Clone());
 		}
 
 		/// <summary>
@@ -116,7 +149,7 @@ namespace GlebTeterin.ReliableSql
 		/// </summary>
 		public void Open()
 		{
-			_retryPolicy.ExecuteAction(() =>
+			_retryPolicy.Clone().ExecuteAction(() =>
 			{
 				if (_connection.State != ConnectionState.Open)
 				{

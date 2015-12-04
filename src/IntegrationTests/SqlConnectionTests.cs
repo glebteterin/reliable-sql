@@ -53,7 +53,7 @@ namespace IntegrationTests
 		[Test]
 		public void NotOpenedConnection_ShouldBeOpened()
 		{
-			var wrapper = new ReliableSqlConnection(Config.ConnectionString, CreateRetryPolicy(0, 1));
+			var wrapper = new ReliableSqlConnection(Config.ConnectionString, new MockRetryStrategy(), new FixedInterval(1, TimeSpan.FromMilliseconds(0)));
 
 			var command = wrapper.CreateCommand();
 			command.CommandText = "SELECT 1";
@@ -68,14 +68,9 @@ namespace IntegrationTests
 
 		private static TestExecutor InitExecutor(string connectionString, int delayMs, int retries)
 		{
-			var executor = new TestExecutor(connectionString, CreateRetryPolicy(delayMs, retries));
+			var executor = new TestExecutor(connectionString, new MockRetryStrategy(), new FixedInterval(retries, TimeSpan.FromMilliseconds(delayMs)));
 
 			return executor;
-		}
-
-		private static RetryPolicy CreateRetryPolicy(int delayMs, int maxRetries)
-		{
-			return new RetryPolicy(new MockRetryStrategy(), maxRetries, TimeSpan.FromMilliseconds(delayMs));
 		}
 	}
 }

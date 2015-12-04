@@ -31,9 +31,9 @@ namespace IntegrationTests
 	{
 		private readonly ConnectionManager _connectionManager;
 
-		public TestExecutor(string connectionString, RetryPolicy retryPolicy)
+		public TestExecutor(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, RetryStrategy retryStrategy)
 		{
-			_connectionManager = new ConnectionManager(connectionString, retryPolicy);
+			_connectionManager = new ConnectionManager(connectionString, errorDetectionStrategy, retryStrategy);
 		}
 
 		public TestResult Execute(Guid id, int attempts, int errorNumber, string errorMessage)

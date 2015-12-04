@@ -48,12 +48,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnectionManagerTests.cs" />
     <Compile Include="ExtendedStrategyTests.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="OfficialTransientErrors.cs" />
     <Compile Include="SqlDatabaseTransientErrorDetectionStrategyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlExceptionBuilder.cs" />
+    <Compile Include="TransientErrorCatchAllStrategy.cs" />
     <Compile Include="UnofficialTransientErrors.cs" />
   </ItemGroup>
   <ItemGroup>
