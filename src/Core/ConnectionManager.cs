@@ -46,21 +46,33 @@ namespace GlebTeterin.ReliableSql
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with the specified number of retry attempts and default fixed time interval between retries.
+		/// </summary>
 		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount)
 			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount))
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with the specified number of retry attempts and fixed time interval between retries.
+		/// </summary>
 		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan retryInterval)
 			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, retryInterval))
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with the specified number of retry attempts and backoff parameters for calculating the exponential delay between retries.
+		/// </summary>
 		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan minBackoff, TimeSpan maxBackoff, TimeSpan deltaBackoff)
 			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, minBackoff, maxBackoff, deltaBackoff))
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="T:GlebTeterin.ReliableSql.ConnectionManager"/> class with the specified number of retry attempts and parameters defining the progressive delay between retries.
+		/// </summary>
 		public ConnectionManager(string connectionString, ITransientErrorDetectionStrategy errorDetectionStrategy, int retryCount, TimeSpan initialInterval, TimeSpan increment)
 			: this(connectionString, new SmartRetryPolicy(errorDetectionStrategy, retryCount, initialInterval, increment))
 		{
