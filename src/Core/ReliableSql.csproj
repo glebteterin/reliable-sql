@@ -48,7 +48,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReliableSqlCommand.cs" />
     <Compile Include="ReliableSqlConnection.cs" />
-    <Compile Include="SaveExecutor.cs" />
     <Compile Include="SmartRetryPolicy.cs" />
   </ItemGroup>
   <ItemGroup>
