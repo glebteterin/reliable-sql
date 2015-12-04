@@ -53,12 +53,15 @@ namespace IntegrationTests
 		[Test]
 		public void NotOpenedConnection_ShouldBeOpened()
 		{
-			var wrapper = new ReliableSqlConnection(Config.ConnectionString, new MockRetryStrategy(), new FixedInterval(1, TimeSpan.FromMilliseconds(0)));
+			var cnn = new ReliableSqlConnection(
+				Config.ConnectionString,
+				new MockRetryStrategy(),
+				new FixedInterval(1, TimeSpan.FromMilliseconds(0)));
 
-			var command = wrapper.CreateCommand();
+			var command = cnn.CreateCommand();
 			command.CommandText = "SELECT 1";
 
-			if (wrapper.State != ConnectionState.Closed)
+			if (cnn.State != ConnectionState.Closed)
 				throw new Exception("It's necessary for the test to keep connection closed.");
 
 			int resul = (int)command.ExecuteScalar();
